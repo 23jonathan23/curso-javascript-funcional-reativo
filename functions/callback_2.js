@@ -7,7 +7,7 @@ function exibir(_, conteudo) {
   console.log(conteudo.toString());
 }
 
-//Leitura de artivo de forma async
+//Leitura de arquivo de forma async
 fs.readFile(caminho, exibir);
 fs.readFile(caminho, (_, conteudo) => console.log(conteudo.toString()));
 
