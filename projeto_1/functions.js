@@ -55,7 +55,18 @@ const sortElementByAttrNumber = (attr, order = 'asc') => array => {
 
 }
 
+function composition(...fns) {
+  return value => fns.reduce(async (acc, fn) => {
+    if (Promise.resolve(acc) === acc) {
+      return fn(await acc)
+    } else {
+      return fn(acc)
+    }
+  }, value)
+}
+
 module.exports = {
+  composition,
   readDirectory,
   elementsEndsWith,
   readArchives,
