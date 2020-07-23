@@ -1,0 +1,23 @@
+{
+  "name": "cursor_js_funcional",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/23jonathan23/curso-javascript-funcional-reativo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/23jonathan23/curso-javascript-funcional-reativo/issues"
+  },
+  "homepage": "https://github.com/23jonathan23/curso-javascript-funcional-reativo#readme",
+  "dependencies": {
+    "rxjs": "^6.6.0"
+  }
+}
