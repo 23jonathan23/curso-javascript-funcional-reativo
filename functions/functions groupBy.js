@@ -5,7 +5,7 @@ const orders = [
   { date: "2020/07/03", name: 'Jarla' },
   { date: "2020/07/02", name: 'Arla' },
   { date: "2020/07/01", name: 'Ana' },
-  { date: "2020/07/03", name: 'Earla' },
+  { date: "2020/07/03", name: 'Earll' },
 ]
 
 const agruparPor = array => {
