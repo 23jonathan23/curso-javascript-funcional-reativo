@@ -2,6 +2,17 @@ const fs = require('fs')
 const path = require('path')
 const { Observable } = require('rxjs')
 
+function createPipeableOperator(operatorFn) {
+  return source => Observable.create(subscriber => {
+    let sub = operatorFn(subscriber)
+    source.subscribe({
+      next: sub.next,
+      error: sub.error || (e => subscriber.error(e)),
+      complete: sub.complete || (_ => subscriber.complete())
+    })
+  })
+}
+
 const readDirectory = pathDir => {
   return new Observable.create(subscriber => {
     try {
@@ -15,60 +26,72 @@ const readDirectory = pathDir => {
   })
 }
 
-const elementsEndsWith = filter => array => array.filter(el => el.endsWith(filter))
-
-const readArchive = pathArchive => new Promise((resolve, reject) => {
-  try {
-    resolve(fs.readFileSync(pathArchive, { encoding: 'utf-8' }).toString())
-  } catch (err) {
-    reject(err)
+const elementsEndsWith = textualPattern => createPipeableOperator(subscriber => ({
+  next(text) {
+    if (text.endsWith(textualPattern)) {
+      subscriber.next(text)
+    }
   }
-})
+}))
 
-const readArchives = pathArchives =>
-  Promise.all(pathArchives.map(path => readArchive(path)))
+const readArchive = _ => createPipeableOperator(subscriber => ({
+  next(pathArchive) {
+    try {
+      const archives = fs.readFileSync(pathArchive, { encoding: 'utf-8' }).toString()
+      subscriber.next(archives)
+    } catch (err) {
+      subscriber.error()
+    }
+  }
+}))
 
-const removeIfEmpty = array => array.filter(el => el.trim())
+const removeIfEmpty = _ => createPipeableOperator(subscriber => ({
+  next(text) {
+    if (text.trim()) subscriber.next(text)
+  }
+}))
 
-const removeIfIncludes = text => array => array.filter(el => !el.includes(text))
+const removeIfOnlyNumber = _ => createPipeableOperator(subscriber => ({
+  next(text) {
+    if (isNaN(parseInt(text))) subscriber.next(text)
+  }
+}))
 
-const removeIfOnlyNumber = array => array.filter(el => isNaN(parseInt(el)))
+const removeCharacters = symbols => createPipeableOperator(subscriber => ({
+  next(text) {
+    const newText = symbols.reduce((acc, symbol) =>
+      acc.split(symbol).join(''), text)
+    subscriber.next(newText)
+  }
+}))
 
-const removeCharacters = symbols =>
-  array => array.map(el => symbols.reduce((acc, symbol) =>
-    acc.split(symbol).join(''), el))
+const splitTextBy = symbol => createPipeableOperator(subscriber => ({
+  next(text) {
+    text.split(symbol).forEach(part => {
+      subscriber.next(part)
+    })
+  }
+}))
 
-const joinElements = array => array.join(' ')
-
-const splitTextBy = symbol => array => array.split(symbol)
-
-const agroupElements = elements =>
-  Object.values(elements.reduce((agroup, element) => {
-    const elementLower = element.toLowerCase()
-    const qtde = agroup[elementLower] ? agroup[elementLower].qtde + 1 : 1
-    agroup[elementLower] = { element: elementLower, qtde }
-    return agroup
-  }, {}))
-
-const sortElementByAttrNumber = (attr, order = 'asc') => array => {
-  const asc = (a, b) => a[attr] - b[attr]
-  const desc = (a, b) => b[attr] - a[attr]
-
-  return array.sort(order === 'asc' ? asc : desc)
-
-}
+const agroupElements = _ => createPipeableOperator(subscriber => ({
+  next(elements) {
+    const grouped = Object.values(elements.reduce((agroup, element) => {
+      const elementLower = element.toLowerCase()
+      const qtde = agroup[elementLower] ? agroup[elementLower].qtde + 1 : 1
+      agroup[elementLower] = { element: elementLower, qtde }
+      return agroup
+    }, {}))
+    subscriber.next(grouped)
+  }
+}))
 
 module.exports = {
   readDirectory,
   elementsEndsWith,
-  readArchives,
   readArchive,
   removeIfEmpty,
-  removeIfIncludes,
   removeIfOnlyNumber,
   removeCharacters,
-  joinElements,
   splitTextBy,
   agroupElements,
-  sortElementByAttrNumber
 }
