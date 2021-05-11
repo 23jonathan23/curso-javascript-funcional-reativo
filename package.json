@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/23jonathan23/curso-javascript-funcional-reativo#readme",
   "dependencies": {
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.21",
     "rxjs": "^6.6.0",
     "xmlhttprequest": "^1.8.0"
   }
